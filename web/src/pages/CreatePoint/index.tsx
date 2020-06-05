@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, ChangeEvent } from 'react';
 import './styles.css';
 import logo from '../../assets/logo.svg';
 import { Link } from 'react-router-dom';
@@ -17,9 +17,15 @@ interface IBGEResponse {
     sigla: string
 }
 
+interface IBGECityResponse {
+    nome: string
+}
+
 const CreatePoint = () => {
     const [item, setItem] = useState<Item[]>([]);
     const [ufs, setUf] = useState<string[]>([]);
+    const [selectedUf, setSelectedUf] = useState('0');
+    const [cities, setCities] = useState<string[]>([]);
 
     useEffect(() => {
         api.get('items').then(response => {
@@ -32,7 +38,20 @@ const CreatePoint = () => {
             const ufInitials = response.data.map(uf => uf.sigla);
             setUf(ufInitials);
         })
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        axios.get<IBGECityResponse[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios`).then(response => {
+            const cityNames = response.data.map(city => city.nome);
+            setCities(cityNames);
+        });
+    }, [selectedUf]);
+    
+    function handleSelectedUf(event: ChangeEvent<HTMLSelectElement>) {
+        const uf = event.target.value;
+
+        setSelectedUf(uf);
+    }
 
     return (
         <div id="page-create-point">
@@ -81,7 +100,7 @@ const CreatePoint = () => {
                     <div className="field-group">
                         <div className="field">
                             <label htmlFor="uf">Estado (UF)</label>
-                            <select name="uf" id="uf">
+                            <select name="uf" id="uf" value={selectedUf} onChange={handleSelectedUf}>
                                 <option value="0">Selecione a UF</option>
                                 {ufs.map(uf => (
                                     <option key={uf} value={uf}>{uf}</option>
@@ -90,7 +109,12 @@ const CreatePoint = () => {
                         </div>
                         <div className="field">
                             <label htmlFor="uf">Cidade</label>
-                            <select name="city" id="city"><option value="0">Selecione uma cidade</option></select>
+                            <select name="city" id="city">
+                                <option value="0">Selecione uma cidade</option>
+                                {cities.map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </fieldset>
