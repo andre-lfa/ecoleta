@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import api from '../../services/api';
+import axios from 'axios';
 
 interface Item {
     id: number,
@@ -12,14 +13,26 @@ interface Item {
     image_url: string
 }
 
+interface IBGEResponse {
+    sigla: string
+}
+
 const CreatePoint = () => {
-    const [item, setItem] = useState<Item[]>([])
+    const [item, setItem] = useState<Item[]>([]);
+    const [ufs, setUf] = useState<string[]>([]);
 
     useEffect(() => {
         api.get('items').then(response => {
             setItem(response.data);
         });
     }, []);
+
+    useEffect(() => {
+        axios.get<IBGEResponse[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados').then(response => {
+            const ufInitials = response.data.map(uf => uf.sigla);
+            setUf(ufInitials);
+        })
+    }, [])
 
     return (
         <div id="page-create-point">
@@ -68,7 +81,12 @@ const CreatePoint = () => {
                     <div className="field-group">
                         <div className="field">
                             <label htmlFor="uf">Estado (UF)</label>
-                            <select name="uf" id="uf"><option value="0">Selecione a UF</option></select>
+                            <select name="uf" id="uf">
+                                <option value="0">Selecione a UF</option>
+                                {ufs.map(uf => (
+                                    <option key={uf} value={uf}>{uf}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="field">
                             <label htmlFor="uf">Cidade</label>
