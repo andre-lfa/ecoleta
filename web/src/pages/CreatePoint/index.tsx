@@ -1,11 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './styles.css';
 import logo from '../../assets/logo.svg';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Map, TileLayer, Marker } from 'react-leaflet';
+import api from '../../services/api';
+
+interface Item {
+    id: number,
+    title: string,
+    image_url: string
+}
 
 const CreatePoint = () => {
+    const [item, setItem] = useState<Item[]>([])
+
+    useEffect(() => {
+        api.get('items').then(response => {
+            setItem(response.data);
+        });
+    }, []);
+
     return (
         <div id="page-create-point">
             <header>
@@ -47,7 +62,7 @@ const CreatePoint = () => {
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <Marker position={[-21.7379341, -41.3109657]}/>
+                        <Marker position={[-21.7379341, -41.3109657]} />
                     </Map>
 
                     <div className="field-group">
@@ -67,30 +82,12 @@ const CreatePoint = () => {
                         <span>Selecione um ou mais itens abaixo</span>
                     </legend>
                     <ul className="items-grid">
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/baterias.svg" alt="Teste" />
-                            <span>Óleo de Cozinha</span>
-                        </li>
+                        {item.map(item => (
+                            <li key={item.id}>
+                                <img src={item.image_url} alt={item.title} />
+                                <span>{item.title}</span>
+                            </li>
+                        ))}
                     </ul>
                 </fieldset>
                 <button type="submit">Cadastrar ponto de coleta</button>
