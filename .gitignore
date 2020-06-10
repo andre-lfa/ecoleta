@@ -384,4 +384,9 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# Uploads and database
+server/uploads/*
+!server/uploads/.gitkeep
+*.sqlite
+
 # End of https://www.gitignore.io/api/node,react
